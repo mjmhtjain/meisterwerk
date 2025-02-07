@@ -4,6 +4,7 @@ A Go-based REST API service for managing quotes and orders.
 
 ## Project Structure
 
+```
 .
 ├── cmd
 │   └── main.go
@@ -17,3 +18,4 @@ A Go-based REST API service for managing quotes and orders.
 │       └── quote_service.go
 ├── go.mod
 └── README.md
+```
