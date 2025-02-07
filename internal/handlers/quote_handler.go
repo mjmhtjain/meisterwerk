@@ -5,6 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/mjmhtjain/meisterwerk/internal/dto"
 	"github.com/mjmhtjain/meisterwerk/internal/models"
 )
 
@@ -20,7 +21,7 @@ func NewQuoteHandler() *QuoteHandler {
 
 func (h *QuoteHandler) CreateQuote() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var req models.Quote
+		var req dto.CreateQuoteRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
