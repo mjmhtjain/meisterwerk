@@ -29,20 +29,6 @@ We need to design and implement a new domain for quote management with the follo
 3. Integration Requirements
    - Support both single and bulk operations for all objects
    - Enable efficient UI interactions including sorting and filtering
-4. Quote Management Domain
-   - Design and implement a new domain for quote management with the following capabilities:
-     1. Product/Service Catalog
-        - Manage master data for products and services
-        - Handle pricing information
-        - Configure and manage tax rates
-     2. Quote Management
-        - Create and manage quotes for customers
-        - Include products/services with respective prices and tax rates
-        - Convert accepted quotes into orders in the existing order scheduling service
-     3. Integration Requirements
-        - Support both single and bulk operations for all objects
-        - Enable efficient UI interactions including sorting and filtering
-        - Facilitate external system integrations
 
 ## Interview Preparation Tasks
 1. System Design
