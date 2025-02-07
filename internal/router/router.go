@@ -1,0 +1,30 @@
+package router
+
+import (
+	"github.com/gin-gonic/gin"
+	"github.com/mjmhtjain/meisterwerk/internal/handlers"
+)
+
+type Router struct {
+	engine *gin.Engine
+}
+
+func (r *Router) Setup() *gin.Engine {
+
+	// Health endpoint
+	r.engine.GET("/health", handlers.NewHealthHandler().Handle())
+
+	// Health endpoint
+	// r.engine.GET("/health", handlers.NewProductHandler(nil).GetProduct)
+
+	// hotels GET endpoint
+	// r.engine.GET("/hotels", handler.NewHotelsHandler().SearchHotels())
+
+	return r.engine
+}
+
+func NewRouter() *Router {
+	return &Router{
+		engine: gin.Default(),
+	}
+}
