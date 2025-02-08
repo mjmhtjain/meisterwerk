@@ -18,11 +18,7 @@ func NewQuoteHandler(service services.QuoteServiceI) *QuoteHandler {
 	}
 }
 
-func (h *QuoteHandler) CreateQuote() gin.HandlerFunc {
-	return h.createQuote
-}
-
-func (h *QuoteHandler) createQuote(c *gin.Context) {
+func (h *QuoteHandler) CreateQuote(c *gin.Context) {
 	var req dto.CreateQuoteRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -36,4 +32,16 @@ func (h *QuoteHandler) createQuote(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, quoteResponse)
+}
+
+func (h *QuoteHandler) GetQuote(c *gin.Context) {
+	id := c.Param("id")
+
+	quoteResponse, err := h.quoteService.GetQuote(id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, quoteResponse)
 }

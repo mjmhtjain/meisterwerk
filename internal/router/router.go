@@ -33,5 +33,7 @@ func createQuotesRouter(api_v1 *gin.RouterGroup) {
 	quoteService := services.NewQuoteService()
 	quoteHandler := handlers.NewQuoteHandler(quoteService)
 
-	quotes.POST("", quoteHandler.CreateQuote())
+	quotes.POST("", quoteHandler.CreateQuote)
+
+	quotes.GET("/:id", quoteHandler.GetQuote)
 }
