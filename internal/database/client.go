@@ -1,31 +1,26 @@
 package database
 
 import (
+	"database/sql"
+
+	_ "github.com/lib/pq"
 	"github.com/mjmhtjain/meisterwerk/internal/config"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
 )
 
-var postgresDB *gorm.DB = nil
+var postgresDB *sql.DB = nil
 
-func NewDBClient(config *config.DatabaseConfig) (*gorm.DB, error) {
+func NewDBClient(config *config.DatabaseConfig) (*sql.DB, error) {
 	if postgresDB != nil {
 		return postgresDB, nil
 	}
 
-	db, err := gorm.Open(postgres.Open(config.GetDSN()), &gorm.Config{})
+	db, err := sql.Open("postgres", config.GetDSN())
 	if err != nil {
 		return nil, err
 	}
 
-	// Get the underlying *sql.DB
-	sqlDB, err := db.DB()
-	if err != nil {
-		return nil, err
-	}
-
-	// Run migrations
-	if err := RunMigrations(sqlDB); err != nil {
+	// Test the connection
+	if err := db.Ping(); err != nil {
 		return nil, err
 	}
 

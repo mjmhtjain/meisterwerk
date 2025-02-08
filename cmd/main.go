@@ -17,8 +17,13 @@ func main() {
 		log.Fatalf("Failed to connect to database or run migrations: %v", err)
 	}
 
+	// Run migrations
+	if err := database.RunMigrations(db); err != nil {
+		log.Fatalf("Failed to run migrations: %v", err)
+	}
+
 	// Initialize routes
-	router := router.NewRouter(db).Setup()
+	router := router.NewRouter().Setup()
 
 	// Start the server
 	if err := router.Run(":" + os.Getenv("PORT")); err != nil {
