@@ -4,18 +4,15 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/mjmhtjain/meisterwerk/internal/handlers"
 	"github.com/mjmhtjain/meisterwerk/internal/services"
-	"gorm.io/gorm"
 )
 
 type Router struct {
 	engine *gin.Engine
-	db     *gorm.DB
 }
 
-func NewRouter(db *gorm.DB) *Router {
+func NewRouter() *Router {
 	return &Router{
 		engine: gin.Default(),
-		db:     db,
 	}
 }
 

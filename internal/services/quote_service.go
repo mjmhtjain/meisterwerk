@@ -1,6 +1,7 @@
 package services
 
 import (
+	"database/sql"
 	"log"
 
 	"github.com/google/uuid"
@@ -8,7 +9,6 @@ import (
 	"github.com/mjmhtjain/meisterwerk/internal/database"
 	"github.com/mjmhtjain/meisterwerk/internal/dto"
 	"github.com/mjmhtjain/meisterwerk/internal/models"
-	"gorm.io/gorm"
 )
 
 type QuoteServiceI interface {
@@ -19,11 +19,10 @@ type QuoteServiceI interface {
 }
 
 type QuoteService struct {
-	db *gorm.DB
+	db *sql.DB
 }
 
 func NewQuoteService() QuoteServiceI {
-	// Initialize database
 	db, err := database.NewDBClient(config.NewDatabaseConfig())
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
@@ -42,7 +41,13 @@ func (s *QuoteService) CreateQuote(req dto.CreateQuoteRequest) (dto.QuoteRespons
 		Status:       "created",
 	}
 
-	if err := s.db.Create(quote).Error; err != nil {
+	query := `
+		INSERT INTO quote (id, author, customer_name, status)
+		VALUES ($1, $2, $3, $4)
+	`
+
+	_, err := s.db.Exec(query, quote.ID, quote.Author, quote.CustomerName, quote.Status)
+	if err != nil {
 		return dto.QuoteResponse{}, err
 	}
 
@@ -56,7 +61,19 @@ func (s *QuoteService) CreateQuote(req dto.CreateQuoteRequest) (dto.QuoteRespons
 
 func (s *QuoteService) GetQuote(id string) (dto.QuoteResponse, error) {
 	var quote models.Quote
-	if err := s.db.Where("id = ?", id).First(&quote).Error; err != nil {
+	query := `
+		SELECT id, author, customer_name, status
+		FROM quote
+		WHERE id = $1
+	`
+
+	err := s.db.QueryRow(query, id).Scan(
+		&quote.ID,
+		&quote.Author,
+		&quote.CustomerName,
+		&quote.Status,
+	)
+	if err != nil {
 		return dto.QuoteResponse{}, err
 	}
 
@@ -69,13 +86,42 @@ func (s *QuoteService) GetQuote(id string) (dto.QuoteResponse, error) {
 }
 
 func (s *QuoteService) UpdateQuote(quote *models.Quote) error {
-	return s.db.Save(quote).Error
+	query := `
+		UPDATE quote
+		SET author = $1, customer_name = $2, status = $3
+		WHERE id = $4
+	`
+
+	_, err := s.db.Exec(query, quote.Author, quote.CustomerName, quote.Status, quote.ID)
+	return err
 }
 
 func (s *QuoteService) GetAllQuotes() ([]models.Quote, error) {
-	var quotes []models.Quote
-	if err := s.db.Find(&quotes).Error; err != nil {
+	query := `
+		SELECT id, author, customer_name, status
+		FROM quote
+	`
+
+	rows, err := s.db.Query(query)
+	if err != nil {
 		return nil, err
 	}
-	return quotes, nil
+	defer rows.Close()
+
+	var quotes []models.Quote
+	for rows.Next() {
+		var quote models.Quote
+		err := rows.Scan(
+			&quote.ID,
+			&quote.Author,
+			&quote.CustomerName,
+			&quote.Status,
+		)
+		if err != nil {
+			return nil, err
+		}
+		quotes = append(quotes, quote)
+	}
+
+	return quotes, rows.Err()
 }
