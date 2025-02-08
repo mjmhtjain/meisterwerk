@@ -4,41 +4,36 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"github.com/mjmhtjain/meisterwerk/internal/dto"
-	"github.com/mjmhtjain/meisterwerk/internal/models"
-	"gorm.io/gorm"
+	"github.com/mjmhtjain/meisterwerk/internal/services"
 )
 
 type QuoteHandler struct {
-	db *gorm.DB
+	quoteService services.QuoteServiceI
 }
 
-func NewQuoteHandler(db *gorm.DB) *QuoteHandler {
+func NewQuoteHandler(service services.QuoteServiceI) *QuoteHandler {
 	return &QuoteHandler{
-		db: db,
+		quoteService: service,
 	}
 }
 
 func (h *QuoteHandler) CreateQuote() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		var req dto.CreateQuoteRequest
-		if err := c.ShouldBindJSON(&req); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
-		}
+	return h.createQuote
+}
 
-		quote := models.Quote{
-			ID:     uuid.New().String(),
-			Author: req.Author,
-			Status: "created",
-		}
-
-		if err := h.db.Create(&quote).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
-
-		c.JSON(http.StatusCreated, quote)
+func (h *QuoteHandler) createQuote(c *gin.Context) {
+	var req dto.CreateQuoteRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
 	}
+
+	quoteResponse, err := h.quoteService.CreateQuote(req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusCreated, quoteResponse)
 }
