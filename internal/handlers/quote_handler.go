@@ -7,15 +7,16 @@ import (
 	"github.com/google/uuid"
 	"github.com/mjmhtjain/meisterwerk/internal/dto"
 	"github.com/mjmhtjain/meisterwerk/internal/models"
+	"gorm.io/gorm"
 )
 
 type QuoteHandler struct {
-	quotes []models.Quote // For now, we'll use in-memory storage
+	db *gorm.DB
 }
 
-func NewQuoteHandler() *QuoteHandler {
+func NewQuoteHandler(db *gorm.DB) *QuoteHandler {
 	return &QuoteHandler{
-		quotes: make([]models.Quote, 0),
+		db: db,
 	}
 }
 
@@ -33,7 +34,11 @@ func (h *QuoteHandler) CreateQuote() gin.HandlerFunc {
 			Status: "created",
 		}
 
-		h.quotes = append(h.quotes, quote)
+		if err := h.db.Create(&quote).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
 		c.JSON(http.StatusCreated, quote)
 	}
 }
