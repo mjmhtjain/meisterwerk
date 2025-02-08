@@ -1,8 +1,9 @@
 package dto
 
 type CreateQuoteRequest struct {
-	Author       string `json:"author" binding:"required"`
-	CustomerName string `json:"customer_name" binding:"required"`
+	Author       string   `json:"author" binding:"required"`
+	CustomerName string   `json:"customer_name" binding:"required"`
+	ProductList  []string `json:"product_list" binding:"required"`
 }
 
 type QuoteResponse struct {
