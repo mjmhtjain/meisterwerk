@@ -2,22 +2,34 @@ package database
 
 import (
 	"github.com/mjmhtjain/meisterwerk/internal/config"
-	"github.com/mjmhtjain/meisterwerk/internal/models"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
-func NewClient(config *config.DatabaseConfig) (*gorm.DB, error) {
+var postgresDB *gorm.DB = nil
+
+func NewDBClient(config *config.DatabaseConfig) (*gorm.DB, error) {
+	if postgresDB != nil {
+		return postgresDB, nil
+	}
+
 	db, err := gorm.Open(postgres.Open(config.GetDSN()), &gorm.Config{})
 	if err != nil {
 		return nil, err
 	}
 
-	// Auto-migrate the schema
-	err = db.AutoMigrate(&models.Quote{})
+	// Get the underlying *sql.DB
+	sqlDB, err := db.DB()
 	if err != nil {
 		return nil, err
 	}
 
-	return db, nil
+	// Run migrations
+	if err := RunMigrations(sqlDB); err != nil {
+		return nil, err
+	}
+
+	postgresDB = db
+
+	return postgresDB, nil
 }

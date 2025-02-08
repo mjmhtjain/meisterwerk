@@ -12,9 +12,9 @@ import (
 func main() {
 	// Initialize database
 	dbConfig := config.NewDatabaseConfig()
-	db, err := database.NewClient(dbConfig)
+	db, err := database.NewDBClient(dbConfig)
 	if err != nil {
-		log.Fatalf("Failed to connect to database: %v", err)
+		log.Fatalf("Failed to connect to database or run migrations: %v", err)
 	}
 
 	// Initialize routes
