@@ -9,22 +9,28 @@ type Router struct {
 	engine *gin.Engine
 }
 
+func NewRouter() *Router {
+	return &Router{
+		engine: gin.Default(),
+	}
+}
+
 func (r *Router) Setup() *gin.Engine {
 
 	// Health endpoint
 	r.engine.GET("/health", handlers.NewHealthHandler().Handle())
 
-	// Health endpoint
-	// r.engine.GET("/health", handlers.NewProductHandler(nil).GetProduct)
+	api_v1 := r.engine.Group("/api/v1")
 
-	// hotels GET endpoint
-	// r.engine.GET("/hotels", handler.NewHotelsHandler().SearchHotels())
+	createQuotesRouter(api_v1)
 
 	return r.engine
 }
 
-func NewRouter() *Router {
-	return &Router{
-		engine: gin.Default(),
-	}
+func createQuotesRouter(api_v1 *gin.RouterGroup) {
+	quotes := api_v1.Group("/quotes")
+
+	quoteHandler := handlers.NewQuoteHandler()
+	quotes.POST("", quoteHandler.CreateQuote())
+
 }

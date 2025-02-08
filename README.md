@@ -1,13 +1,21 @@
+# Meisterwerk
 
+A Go-based REST API service for managing quotes and orders.
+
+## Project Structure
+
+```
 .
 ├── cmd
 │   └── main.go
 ├── internal
 │   ├── handlers
-│   │   └── product_handler.go
+│   │   ├── health_handler.go
+│   │   └── quote_handler.go
 │   ├── models
-│   │   └── product.go
+│   │   └── quote.go
 │   └── service
-│       └── product_service.go
+│       └── quote_service.go
 ├── go.mod
 └── README.md
+```
