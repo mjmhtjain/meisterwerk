@@ -14,8 +14,6 @@ import (
 type QuoteServiceI interface {
 	CreateQuote(quote dto.CreateQuoteRequest) (dto.QuoteResponse, error)
 	GetQuote(id string) (dto.QuoteResponse, error)
-	UpdateQuote(quote *models.Quote) error
-	GetAllQuotes() ([]models.Quote, error)
 }
 
 type QuoteService struct {
