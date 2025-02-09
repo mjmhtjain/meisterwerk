@@ -45,3 +45,20 @@ func (h *QuoteHandler) GetQuote(c *gin.Context) {
 
 	c.JSON(http.StatusOK, quoteResponse)
 }
+
+func (h *QuoteHandler) UpdateQuoteStatus(c *gin.Context) {
+	id := c.Param("id")
+	var req dto.UpdateQuoteStatusRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	err := h.quoteService.UpdateQuoteStatus(id, req.Status)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Quote status updated successfully"})
+}

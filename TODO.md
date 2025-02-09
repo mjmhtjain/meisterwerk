@@ -1,7 +1,6 @@
 ### Tasks
 
 Task 1:
-- Create Repository
 - Quote includes product list
 - response should include product list
 - response should include total price

@@ -4,8 +4,9 @@ import "github.com/mjmhtjain/meisterwerk/internal/models"
 
 // Custom mock for QuoteRepository
 type MockQuoteRepository struct {
-	Quotes []models.Quote
-	Err    error
+	Quotes   []models.Quote
+	Err      error
+	Products []models.Product
 }
 
 func (m *MockQuoteRepository) Create(quote models.Quote) error {
@@ -28,4 +29,12 @@ func (m *MockQuoteRepository) GetByID(id string) (models.Quote, error) {
 
 func (m *MockQuoteRepository) GetAll() ([]models.Quote, error) {
 	return m.Quotes, m.Err
+}
+
+func (m *MockQuoteRepository) UpdateQuoteStatus(id string, status string) error {
+	return m.Err
+}
+
+func (m *MockQuoteRepository) GetProductsByQuoteID(id string) ([]models.Product, error) {
+	return m.Products, m.Err
 }
