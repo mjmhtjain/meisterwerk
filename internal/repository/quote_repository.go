@@ -8,10 +8,10 @@ import (
 )
 
 type QuoteRepositoryI interface {
-	Create(quote *models.Quote) error
+	Create(quote models.Quote) error
 	CreateQuoteProductMap(quoteID string, productID string) error
-	GetByID(id string) (*models.Quote, error)
-	Update(quote *models.Quote) error
+	GetByID(id string) (models.Quote, error)
+	// Update(quote *models.Quote) error
 	GetAll() ([]models.Quote, error)
 }
 
@@ -25,7 +25,7 @@ func NewQuoteRepository(db *sql.DB) QuoteRepositoryI {
 	}
 }
 
-func (r *QuoteRepository) Create(quote *models.Quote) error {
+func (r *QuoteRepository) Create(quote models.Quote) error {
 	query := `
 		INSERT INTO quote (id, author, customer_name, status)
 		VALUES ($1, $2, $3, $4)
@@ -43,7 +43,7 @@ func (r *QuoteRepository) CreateQuoteProductMap(quoteID string, productID string
 	return err
 }
 
-func (r *QuoteRepository) GetByID(id string) (*models.Quote, error) {
+func (r *QuoteRepository) GetByID(id string) (models.Quote, error) {
 	var quote models.Quote
 	query := `
 		SELECT id, author, customer_name, status
@@ -58,10 +58,10 @@ func (r *QuoteRepository) GetByID(id string) (*models.Quote, error) {
 		&quote.Status,
 	)
 	if err != nil {
-		return nil, err
+		return models.Quote{}, err
 	}
 
-	return &quote, nil
+	return quote, nil
 }
 
 func (r *QuoteRepository) Update(quote *models.Quote) error {

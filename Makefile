@@ -48,6 +48,10 @@ compose-rebuild:
 compose-clean:
 	docker-compose down -v
 
+# Run all tests
+test:
+	go test -v ./...
+
 # Help command
 help:
 	@echo "Makefile commands:"
@@ -62,4 +66,5 @@ help:
 	@echo "  make compose-logs  - View logs"
 	@echo "  make compose-rebuild - Rebuild and restart services"
 	@echo "  make compose-clean - Clean up volumes"
+	@echo "  make test          - Run all tests"
 	@echo "  make help          - Show this help message"
