@@ -10,24 +10,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/mjmhtjain/meisterwerk/internal/dto"
+	"github.com/mjmhtjain/meisterwerk/internal/handlers/mocks"
 	"github.com/mjmhtjain/meisterwerk/internal/services"
 	"github.com/stretchr/testify/assert"
 )
-
-// MockProductService is a simple mock implementation
-type MockProductService struct {
-	products []dto.ProductResponse
-	product  dto.ProductResponse
-	err      error
-}
-
-func (m *MockProductService) GetAllProducts() ([]dto.ProductResponse, error) {
-	return m.products, m.err
-}
-
-func (m *MockProductService) GetProduct(id string) (dto.ProductResponse, error) {
-	return m.product, m.err
-}
 
 func setupTestRouter(mockService services.ProductServiceI) *gin.Engine {
 	gin.SetMode(gin.TestMode)
@@ -41,8 +27,8 @@ func setupTestRouter(mockService services.ProductServiceI) *gin.Engine {
 
 func TestGetAllProducts(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
-		mockService := &MockProductService{
-			products: []dto.ProductResponse{
+		mockService := &mocks.MockProductService{
+			Products: []dto.ProductResponse{
 				{ID: "1", Name: "Product 1", Price: 100, Tax: 10},
 				{ID: "2", Name: "Product 2", Price: 200, Tax: 20},
 			},
@@ -58,14 +44,14 @@ func TestGetAllProducts(t *testing.T) {
 		var response []dto.ProductResponse
 		err := json.Unmarshal(w.Body.Bytes(), &response)
 		assert.NoError(t, err)
-		assert.Equal(t, len(mockService.products), len(response))
-		assert.Equal(t, mockService.products[0].ID, response[0].ID)
-		assert.Equal(t, mockService.products[1].ID, response[1].ID)
+		assert.Equal(t, len(mockService.Products), len(response))
+		assert.Equal(t, mockService.Products[0].ID, response[0].ID)
+		assert.Equal(t, mockService.Products[1].ID, response[1].ID)
 	})
 
 	t.Run("NoProducts", func(t *testing.T) {
-		mockService := &MockProductService{
-			products: []dto.ProductResponse{},
+		mockService := &mocks.MockProductService{
+			Products: []dto.ProductResponse{},
 		}
 		router := setupTestRouter(mockService)
 
@@ -82,8 +68,8 @@ func TestGetAllProducts(t *testing.T) {
 	})
 
 	t.Run("ServiceError", func(t *testing.T) {
-		mockService := &MockProductService{
-			err: errors.New("service error"),
+		mockService := &mocks.MockProductService{
+			Err: errors.New("service error"),
 		}
 		router := setupTestRouter(mockService)
 
@@ -95,8 +81,8 @@ func TestGetAllProducts(t *testing.T) {
 	})
 
 	t.Run("ResponseStructure", func(t *testing.T) {
-		mockService := &MockProductService{
-			products: []dto.ProductResponse{
+		mockService := &mocks.MockProductService{
+			Products: []dto.ProductResponse{
 				{ID: "1", Name: "Product 1", Price: 100, Tax: 10},
 			},
 		}

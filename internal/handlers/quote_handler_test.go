@@ -9,23 +9,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/mjmhtjain/meisterwerk/internal/dto"
+	"github.com/mjmhtjain/meisterwerk/internal/handlers/mocks"
 	"github.com/stretchr/testify/assert"
 )
-
-// MockQuoteService is a custom mock implementation of QuoteServiceI
-type MockQuoteService struct {
-	createQuoteFunc func(req dto.CreateQuoteRequest) (dto.QuoteResponse, error)
-	getQuoteFunc    func(id string) (dto.QuoteResponse, error)
-}
-
-func (m *MockQuoteService) CreateQuote(req dto.CreateQuoteRequest) (dto.QuoteResponse, error) {
-
-	return m.createQuoteFunc(req)
-}
-
-func (m *MockQuoteService) GetQuote(id string) (dto.QuoteResponse, error) {
-	return m.getQuoteFunc(id)
-}
 
 func TestCreateQuote(t *testing.T) {
 	gin.SetMode(gin.TestMode)
@@ -33,7 +19,7 @@ func TestCreateQuote(t *testing.T) {
 	tests := []struct {
 		name           string
 		request        dto.CreateQuoteRequest
-		setupMock      func(*MockQuoteService)
+		setupMock      func(*mocks.MockQuoteService)
 		expectedStatus int
 		expectedBody   interface{}
 	}{
@@ -44,8 +30,8 @@ func TestCreateQuote(t *testing.T) {
 				CustomerName: "customer123",
 				ProductList:  []string{"product1", "product2"},
 			},
-			setupMock: func(m *MockQuoteService) {
-				m.createQuoteFunc = func(req dto.CreateQuoteRequest) (dto.QuoteResponse, error) {
+			setupMock: func(m *mocks.MockQuoteService) {
+				m.CreateQuoteFunc = func(req dto.CreateQuoteRequest) (dto.QuoteResponse, error) {
 					return dto.QuoteResponse{
 						ID:           "quote123",
 						Author:       "author123",
@@ -65,7 +51,7 @@ func TestCreateQuote(t *testing.T) {
 		{
 			name:           "Invalid Request Body",
 			request:        dto.CreateQuoteRequest{},
-			setupMock:      func(m *MockQuoteService) {},
+			setupMock:      func(m *mocks.MockQuoteService) {},
 			expectedStatus: http.StatusBadRequest,
 			expectedBody: gin.H{
 				"error": "Key: 'CreateQuoteRequest.Author' Error:Field validation for 'Author' failed on the 'required' tag\nKey: 'CreateQuoteRequest.CustomerName' Error:Field validation for 'CustomerName' failed on the 'required' tag\nKey: 'CreateQuoteRequest.ProductList' Error:Field validation for 'ProductList' failed on the 'required' tag",
@@ -76,7 +62,7 @@ func TestCreateQuote(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// Setup
-			mockService := &MockQuoteService{}
+			mockService := &mocks.MockQuoteService{}
 			if tt.setupMock != nil {
 				tt.setupMock(mockService)
 			}
