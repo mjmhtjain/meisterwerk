@@ -1,7 +1,6 @@
 package services
 
 import (
-	"database/sql"
 	"log"
 
 	"github.com/google/uuid"
@@ -9,6 +8,7 @@ import (
 	"github.com/mjmhtjain/meisterwerk/internal/database"
 	"github.com/mjmhtjain/meisterwerk/internal/dto"
 	"github.com/mjmhtjain/meisterwerk/internal/models"
+	"github.com/mjmhtjain/meisterwerk/internal/repository"
 )
 
 type QuoteServiceI interface {
@@ -20,7 +20,7 @@ type QuoteServiceI interface {
 
 type QuoteService struct {
 	productService ProductServiceI
-	db             *sql.DB
+	quoteRepo      repository.QuoteRepositoryI
 }
 
 func NewQuoteService() QuoteServiceI {
@@ -29,11 +29,9 @@ func NewQuoteService() QuoteServiceI {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
 
-	prodService := NewProductService()
-
 	return &QuoteService{
-		productService: prodService,
-		db:             db,
+		productService: NewProductService(),
+		quoteRepo:      repository.NewQuoteRepository(db),
 	}
 }
 
@@ -42,7 +40,7 @@ func (s *QuoteService) CreateQuote(quoteReq dto.CreateQuoteRequest) (dto.QuoteRe
 	for _, p := range quoteReq.ProductList {
 		_, err := s.productService.GetProduct(p)
 		if err != nil {
-			// throw error
+			return dto.QuoteResponse{}, err
 		}
 	}
 
@@ -53,24 +51,12 @@ func (s *QuoteService) CreateQuote(quoteReq dto.CreateQuoteRequest) (dto.QuoteRe
 		Status:       "created",
 	}
 
-	query := `
-		INSERT INTO quote (id, author, customer_name, status)
-		VALUES ($1, $2, $3, $4)
-	`
-
-	query2 := `
-	INSERT INTO quote_product_map (id, quote_fk, product_fk)
-	VALUES ($1, $2, $3)
-`
-
-	_, err := s.db.Exec(query, quote.ID, quote.Author, quote.CustomerName, quote.Status)
-	if err != nil {
+	if err := s.quoteRepo.Create(&quote); err != nil {
 		return dto.QuoteResponse{}, err
 	}
 
 	for _, p := range quoteReq.ProductList {
-		_, err = s.db.Exec(query2, uuid.New().String(), quote.ID, p)
-		if err != nil {
+		if err := s.quoteRepo.CreateQuoteProductMap(quote.ID, p); err != nil {
 			return dto.QuoteResponse{}, err
 		}
 	}
@@ -84,19 +70,7 @@ func (s *QuoteService) CreateQuote(quoteReq dto.CreateQuoteRequest) (dto.QuoteRe
 }
 
 func (s *QuoteService) GetQuote(id string) (dto.QuoteResponse, error) {
-	var quote models.Quote
-	query := `
-		SELECT id, author, customer_name, status
-		FROM quote
-		WHERE id = $1
-	`
-
-	err := s.db.QueryRow(query, id).Scan(
-		&quote.ID,
-		&quote.Author,
-		&quote.CustomerName,
-		&quote.Status,
-	)
+	quote, err := s.quoteRepo.GetByID(id)
 	if err != nil {
 		return dto.QuoteResponse{}, err
 	}
@@ -110,42 +84,9 @@ func (s *QuoteService) GetQuote(id string) (dto.QuoteResponse, error) {
 }
 
 func (s *QuoteService) UpdateQuote(quote *models.Quote) error {
-	query := `
-		UPDATE quote
-		SET author = $1, customer_name = $2, status = $3
-		WHERE id = $4
-	`
-
-	_, err := s.db.Exec(query, quote.Author, quote.CustomerName, quote.Status, quote.ID)
-	return err
+	return s.quoteRepo.Update(quote)
 }
 
 func (s *QuoteService) GetAllQuotes() ([]models.Quote, error) {
-	query := `
-		SELECT id, author, customer_name, status
-		FROM quote
-	`
-
-	rows, err := s.db.Query(query)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	var quotes []models.Quote
-	for rows.Next() {
-		var quote models.Quote
-		err := rows.Scan(
-			&quote.ID,
-			&quote.Author,
-			&quote.CustomerName,
-			&quote.Status,
-		)
-		if err != nil {
-			return nil, err
-		}
-		quotes = append(quotes, quote)
-	}
-
-	return quotes, rows.Err()
+	return s.quoteRepo.GetAll()
 }
