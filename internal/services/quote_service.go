@@ -14,6 +14,7 @@ import (
 type QuoteServiceI interface {
 	CreateQuote(quote dto.CreateQuoteRequest) (dto.QuoteResponse, error)
 	GetQuote(id string) (dto.QuoteResponse, error)
+	UpdateQuoteStatus(id string, status string) error
 }
 
 type QuoteService struct {
@@ -128,4 +129,8 @@ func (s *QuoteService) GetQuote(id string) (dto.QuoteResponse, error) {
 
 func (s *QuoteService) GetAllQuotes() ([]models.Quote, error) {
 	return s.quoteRepo.GetAll()
+}
+
+func (s *QuoteService) UpdateQuoteStatus(id string, status string) error {
+	return s.quoteRepo.UpdateQuoteStatus(id, status)
 }

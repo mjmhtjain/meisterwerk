@@ -12,7 +12,7 @@ type QuoteRepositoryI interface {
 	CreateQuoteProductMap(quoteID string, productID string) error
 	GetProductsByQuoteID(id string) ([]models.Product, error)
 	GetByID(id string) (models.Quote, error)
-	// Update(quote *models.Quote) error
+	UpdateQuoteStatus(id string, status string) error
 	GetAll() ([]models.Quote, error)
 }
 
@@ -130,4 +130,14 @@ func (r *QuoteRepository) GetProductsByQuoteID(id string) ([]models.Product, err
 	}
 
 	return products, rows.Err()
+}
+
+func (r *QuoteRepository) UpdateQuoteStatus(id string, status string) error {
+	query := `
+		UPDATE quote
+		SET status = $1
+		WHERE id = $2
+	`
+	_, err := r.db.Exec(query, status, id)
+	return err
 }

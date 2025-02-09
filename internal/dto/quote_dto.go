@@ -15,3 +15,7 @@ type QuoteResponse struct {
 	TotalTax     float64           `json:"total_tax"`
 	Status       string            `json:"status"`
 }
+
+type UpdateQuoteStatusRequest struct {
+	Status string `json:"status" binding:"required"`
+}

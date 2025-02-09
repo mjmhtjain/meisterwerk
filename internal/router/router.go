@@ -37,6 +37,8 @@ func createQuotesRouter(api_v1 *gin.RouterGroup) {
 	quotes.POST("", quoteHandler.CreateQuote)
 
 	quotes.GET("/:id", quoteHandler.GetQuote)
+
+	quotes.PUT("/:id/status", quoteHandler.UpdateQuoteStatus)
 }
 
 func createProductsRouter(api_v1 *gin.RouterGroup) {
