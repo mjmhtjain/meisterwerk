@@ -9,7 +9,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/mjmhtjain/meisterwerk/internal/dto"
-	"github.com/mjmhtjain/meisterwerk/internal/handlers/mocks"
+	"github.com/mjmhtjain/meisterwerk/internal/services/mocks"
 	"github.com/stretchr/testify/assert"
 )
 

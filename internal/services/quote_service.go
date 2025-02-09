@@ -49,7 +49,7 @@ func (s *QuoteService) CreateQuote(quoteReq dto.CreateQuoteRequest) (dto.QuoteRe
 		Status:       "created",
 	}
 
-	if err := s.quoteRepo.Create(&quote); err != nil {
+	if err := s.quoteRepo.Create(quote); err != nil {
 		return dto.QuoteResponse{}, err
 	}
 
@@ -79,10 +79,6 @@ func (s *QuoteService) GetQuote(id string) (dto.QuoteResponse, error) {
 		CustomerName: quote.CustomerName,
 		Status:       quote.Status,
 	}, nil
-}
-
-func (s *QuoteService) UpdateQuote(quote *models.Quote) error {
-	return s.quoteRepo.Update(quote)
 }
 
 func (s *QuoteService) GetAllQuotes() ([]models.Quote, error) {

@@ -11,7 +11,7 @@ import (
 
 type ProductRepositoryI interface {
 	GetAll() ([]models.Product, error)
-	GetByID(id string) (*models.Product, error)
+	GetByID(id string) (models.Product, error)
 }
 
 type ProductRepository struct {
@@ -49,15 +49,15 @@ func (r *ProductRepository) GetAll() ([]models.Product, error) {
 	return products, nil
 }
 
-func (r *ProductRepository) GetByID(id string) (*models.Product, error) {
+func (r *ProductRepository) GetByID(id string) (models.Product, error) {
 	var product models.Product
 	err := r.db.QueryRow("SELECT id, name, price, tax FROM product WHERE id = $1", id).
 		Scan(&product.ID, &product.Name, &product.Price, &product.Tax)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, nil
+			return models.Product{}, nil
 		}
-		return nil, err
+		return models.Product{}, err
 	}
-	return &product, nil
+	return product, nil
 }
