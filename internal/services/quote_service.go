@@ -35,11 +35,14 @@ func NewQuoteService() QuoteServiceI {
 
 func (s *QuoteService) CreateQuote(quoteReq dto.CreateQuoteRequest) (dto.QuoteResponse, error) {
 	// verify the products list
+	products := []dto.ProductResponse{}
+
 	for _, p := range quoteReq.ProductList {
-		_, err := s.productService.GetProduct(p)
+		product, err := s.productService.GetProduct(p)
 		if err != nil {
 			return dto.QuoteResponse{}, err
 		}
+		products = append(products, product)
 	}
 
 	quote := models.Quote{
@@ -59,10 +62,22 @@ func (s *QuoteService) CreateQuote(quoteReq dto.CreateQuoteRequest) (dto.QuoteRe
 		}
 	}
 
+	// calculate the total price and tax
+	totalPrice := 0.0
+	totalTax := 0.0
+
+	for _, p := range products {
+		totalPrice += p.Price
+		totalTax += p.Price * (p.Tax / 100)
+	}
+
 	return dto.QuoteResponse{
 		ID:           quote.ID,
 		Author:       quote.Author,
 		CustomerName: quote.CustomerName,
+		ProductList:  products,
+		TotalPrice:   totalPrice,
+		TotalTax:     totalTax,
 		Status:       quote.Status,
 	}, nil
 }
@@ -73,12 +88,42 @@ func (s *QuoteService) GetQuote(id string) (dto.QuoteResponse, error) {
 		return dto.QuoteResponse{}, err
 	}
 
-	return dto.QuoteResponse{
+	products, err := s.quoteRepo.GetProductsByQuoteID(id)
+	if err != nil {
+		return dto.QuoteResponse{}, err
+	}
+
+	productsResponse := []dto.ProductResponse{}
+
+	for _, p := range products {
+		productsResponse = append(productsResponse, dto.ProductResponse{
+			ID:    p.ID,
+			Name:  p.Name,
+			Price: p.Price,
+			Tax:   p.Tax,
+		})
+	}
+
+	// calculate the total price and tax
+	totalPrice := 0.0
+	totalTax := 0.0
+
+	for _, p := range products {
+		totalPrice += p.Price
+		totalTax += p.Price * (p.Tax / 100)
+	}
+
+	quoteResponse := dto.QuoteResponse{
 		ID:           quote.ID,
 		Author:       quote.Author,
 		CustomerName: quote.CustomerName,
+		ProductList:  productsResponse,
+		TotalPrice:   totalPrice,
+		TotalTax:     totalTax,
 		Status:       quote.Status,
-	}, nil
+	}
+
+	return quoteResponse, nil
 }
 
 func (s *QuoteService) GetAllQuotes() ([]models.Quote, error) {

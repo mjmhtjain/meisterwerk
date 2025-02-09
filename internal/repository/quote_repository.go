@@ -10,6 +10,7 @@ import (
 type QuoteRepositoryI interface {
 	Create(quote models.Quote) error
 	CreateQuoteProductMap(quoteID string, productID string) error
+	GetProductsByQuoteID(id string) ([]models.Product, error)
 	GetByID(id string) (models.Quote, error)
 	// Update(quote *models.Quote) error
 	GetAll() ([]models.Quote, error)
@@ -102,4 +103,31 @@ func (r *QuoteRepository) GetAll() ([]models.Quote, error) {
 	}
 
 	return quotes, rows.Err()
+}
+
+func (r *QuoteRepository) GetProductsByQuoteID(id string) ([]models.Product, error) {
+	query := `
+		SELECT p.id, p.name, p.price, p.tax
+		FROM product p
+		INNER JOIN quote_product_map qpm ON p.id = qpm.product_fk
+		WHERE qpm.quote_fk = $1
+	`
+
+	rows, err := r.db.Query(query, id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var products []models.Product
+	for rows.Next() {
+		var product models.Product
+		err := rows.Scan(&product.ID, &product.Name, &product.Price, &product.Tax)
+		if err != nil {
+			return nil, err
+		}
+		products = append(products, product)
+	}
+
+	return products, rows.Err()
 }
