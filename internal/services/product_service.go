@@ -12,6 +12,7 @@ import (
 
 type ProductServiceI interface {
 	GetAllProducts() ([]dto.ProductResponse, error)
+	GetProduct(id string) (dto.ProductResponse, error)
 }
 
 type ProductService struct {
@@ -52,4 +53,8 @@ func (s *ProductService) GetAllProducts() ([]dto.ProductResponse, error) {
 	}
 
 	return products, nil
+}
+
+func (s *ProductService) GetProduct(id string) (dto.ProductResponse, error) {
+	return dto.ProductResponse{}, nil
 }

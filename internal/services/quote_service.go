@@ -19,7 +19,8 @@ type QuoteServiceI interface {
 }
 
 type QuoteService struct {
-	db *sql.DB
+	productService ProductServiceI
+	db             *sql.DB
 }
 
 func NewQuoteService() QuoteServiceI {
@@ -28,16 +29,27 @@ func NewQuoteService() QuoteServiceI {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
 
+	prodService := NewProductService()
+
 	return &QuoteService{
-		db: db,
+		productService: prodService,
+		db:             db,
 	}
 }
 
-func (s *QuoteService) CreateQuote(req dto.CreateQuoteRequest) (dto.QuoteResponse, error) {
+func (s *QuoteService) CreateQuote(quoteReq dto.CreateQuoteRequest) (dto.QuoteResponse, error) {
+	// verify the products list
+	for _, p := range quoteReq.ProductList {
+		_, err := s.productService.GetProduct(p)
+		if err != nil {
+			// throw error
+		}
+	}
+
 	quote := models.Quote{
 		ID:           uuid.New().String(),
-		Author:       req.Author,
-		CustomerName: req.CustomerName,
+		Author:       quoteReq.Author,
+		CustomerName: quoteReq.CustomerName,
 		Status:       "created",
 	}
 
@@ -46,9 +58,21 @@ func (s *QuoteService) CreateQuote(req dto.CreateQuoteRequest) (dto.QuoteRespons
 		VALUES ($1, $2, $3, $4)
 	`
 
+	query2 := `
+	INSERT INTO quote_product_map (id, quote_fk, product_fk)
+	VALUES ($1, $2, $3)
+`
+
 	_, err := s.db.Exec(query, quote.ID, quote.Author, quote.CustomerName, quote.Status)
 	if err != nil {
 		return dto.QuoteResponse{}, err
+	}
+
+	for _, p := range quoteReq.ProductList {
+		_, err = s.db.Exec(query2, uuid.New().String(), quote.ID, p)
+		if err != nil {
+			return dto.QuoteResponse{}, err
+		}
 	}
 
 	return dto.QuoteResponse{
