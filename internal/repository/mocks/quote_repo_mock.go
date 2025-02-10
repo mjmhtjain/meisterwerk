@@ -1,6 +1,9 @@
 package mocks
 
-import "github.com/mjmhtjain/meisterwerk/internal/models"
+import (
+	"github.com/mjmhtjain/meisterwerk/internal/dto"
+	"github.com/mjmhtjain/meisterwerk/internal/models"
+)
 
 // Custom mock for QuoteRepository
 type MockQuoteRepository struct {
@@ -31,7 +34,7 @@ func (m *MockQuoteRepository) GetAll() ([]models.Quote, error) {
 	return m.Quotes, m.Err
 }
 
-func (m *MockQuoteRepository) UpdateQuoteStatus(id string, status string) error {
+func (m *MockQuoteRepository) UpdateQuoteStatus(id string, status dto.QuoteStatus) error {
 	return m.Err
 }
 

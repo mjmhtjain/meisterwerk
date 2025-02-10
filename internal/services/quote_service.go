@@ -1,11 +1,9 @@
 package services
 
 import (
-	"log"
+	"time"
 
 	"github.com/google/uuid"
-	"github.com/mjmhtjain/meisterwerk/internal/config"
-	"github.com/mjmhtjain/meisterwerk/internal/database"
 	"github.com/mjmhtjain/meisterwerk/internal/dto"
 	"github.com/mjmhtjain/meisterwerk/internal/models"
 	"github.com/mjmhtjain/meisterwerk/internal/repository"
@@ -14,23 +12,21 @@ import (
 type QuoteServiceI interface {
 	CreateQuote(quote dto.CreateQuoteRequest) (dto.QuoteResponse, error)
 	GetQuote(id string) (dto.QuoteResponse, error)
-	UpdateQuoteStatus(id string, status string) error
+	UpdateQuoteStatus(id string, status dto.QuoteStatus) error
 }
 
 type QuoteService struct {
 	productService ProductServiceI
 	quoteRepo      repository.QuoteRepositoryI
+	orderService   OrderServiceI
 }
 
 func NewQuoteService() QuoteServiceI {
-	db, err := database.NewDBClient(config.NewDatabaseConfig())
-	if err != nil {
-		log.Fatalf("Failed to connect to database: %v", err)
-	}
 
 	return &QuoteService{
 		productService: NewProductService(),
-		quoteRepo:      repository.NewQuoteRepository(db),
+		quoteRepo:      repository.NewQuoteRepository(),
+		orderService:   NewOrderService(),
 	}
 }
 
@@ -131,6 +127,26 @@ func (s *QuoteService) GetAllQuotes() ([]models.Quote, error) {
 	return s.quoteRepo.GetAll()
 }
 
-func (s *QuoteService) UpdateQuoteStatus(id string, status string) error {
-	return s.quoteRepo.UpdateQuoteStatus(id, status)
+func (s *QuoteService) UpdateQuoteStatus(id string, status dto.QuoteStatus) error {
+	err := s.quoteRepo.UpdateQuoteStatus(id, status)
+	if err != nil {
+		return err
+	}
+
+	// if the quote is accepted, create an order
+	if status == dto.QuoteStatusAccepted {
+		order := models.Order{
+			ID:        uuid.New().String(),
+			Status:    dto.OrderStatusCreated.String(),
+			QuoteFK:   id,
+			CreatedAt: time.Now(),
+			UpdatedAt: time.Now(),
+		}
+		_, err := s.orderService.CreateOrder(order)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

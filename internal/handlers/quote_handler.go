@@ -54,7 +54,13 @@ func (h *QuoteHandler) UpdateQuoteStatus(c *gin.Context) {
 		return
 	}
 
-	err := h.quoteService.UpdateQuoteStatus(id, req.Status)
+	quoteStatus := dto.QuoteStatus(req.Status)
+	if !quoteStatus.IsValid() {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid quote status"})
+		return
+	}
+
+	err := h.quoteService.UpdateQuoteStatus(id, quoteStatus)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
