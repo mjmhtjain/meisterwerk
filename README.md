@@ -191,7 +191,7 @@ The project includes a Makefile to simplify common tasks. Here are the available
   make stop
   ```
 
-- **Remove the Docker container**:
+- **Remove the Docker container (if exists)**:
   ```bash
   make clean
   ```
@@ -199,6 +199,41 @@ The project includes a Makefile to simplify common tasks. Here are the available
 - **Access the health endpoint**:
   ```bash
   make access
+  ```
+
+- **Remove unused Docker data**:
+  ```bash
+  make prune
+  ```
+
+- **Start all services with docker-compose**:
+  ```bash
+  make compose-up
+  ```
+
+- **Stop all services**:
+  ```bash
+  make compose-down
+  ```
+
+- **View logs**:
+  ```bash
+  make compose-logs
+  ```
+
+- **Rebuild and restart services**:
+  ```bash
+  make compose-rebuild
+  ```
+
+- **Clean up volumes**:
+  ```bash
+  make compose-clean
+  ```
+
+- **Run all tests**:
+  ```bash
+  make test
   ```
 
 - **Show help message**:
