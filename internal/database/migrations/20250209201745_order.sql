@@ -5,7 +5,8 @@ CREATE TABLE
     id VARCHAR(255) NOT NULL,
     quote_fk VARCHAR(255) NOT NULL,
     status VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP NOT NULL
+    created_at TIMESTAMP NOT NULL,
+    updated_at TIMESTAMP NOT NULL
   );
 
 ALTER TABLE

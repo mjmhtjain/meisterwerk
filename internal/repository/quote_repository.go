@@ -2,8 +2,12 @@ package repository
 
 import (
 	"database/sql"
+	"log"
 
 	"github.com/google/uuid"
+	"github.com/mjmhtjain/meisterwerk/internal/config"
+	"github.com/mjmhtjain/meisterwerk/internal/database"
+	"github.com/mjmhtjain/meisterwerk/internal/dto"
 	"github.com/mjmhtjain/meisterwerk/internal/models"
 )
 
@@ -12,7 +16,7 @@ type QuoteRepositoryI interface {
 	CreateQuoteProductMap(quoteID string, productID string) error
 	GetProductsByQuoteID(id string) ([]models.Product, error)
 	GetByID(id string) (models.Quote, error)
-	UpdateQuoteStatus(id string, status string) error
+	UpdateQuoteStatus(id string, status dto.QuoteStatus) error
 	GetAll() ([]models.Quote, error)
 }
 
@@ -20,7 +24,12 @@ type QuoteRepository struct {
 	db *sql.DB
 }
 
-func NewQuoteRepository(db *sql.DB) QuoteRepositoryI {
+func NewQuoteRepository() QuoteRepositoryI {
+	db, err := database.NewDBClient(config.NewDatabaseConfig())
+	if err != nil {
+		log.Fatalf("Failed to connect to database: %v", err)
+	}
+
 	return &QuoteRepository{
 		db: db,
 	}
@@ -132,12 +141,12 @@ func (r *QuoteRepository) GetProductsByQuoteID(id string) ([]models.Product, err
 	return products, rows.Err()
 }
 
-func (r *QuoteRepository) UpdateQuoteStatus(id string, status string) error {
+func (r *QuoteRepository) UpdateQuoteStatus(id string, status dto.QuoteStatus) error {
 	query := `
 		UPDATE quote
 		SET status = $1
 		WHERE id = $2
 	`
-	_, err := r.db.Exec(query, status, id)
+	_, err := r.db.Exec(query, status.String(), id)
 	return err
 }
