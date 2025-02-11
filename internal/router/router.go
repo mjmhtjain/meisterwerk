@@ -25,6 +25,7 @@ func (r *Router) Setup() *gin.Engine {
 
 	createQuotesRouter(api_v1)
 	createProductsRouter(api_v1)
+	createOrdersRouter(api_v1)
 
 	return r.engine
 }
@@ -47,4 +48,12 @@ func createProductsRouter(api_v1 *gin.RouterGroup) {
 	productHandler := handlers.NewProductHandler(productService)
 
 	products.GET("", productHandler.GetAllProducts)
+}
+
+func createOrdersRouter(api_v1 *gin.RouterGroup) {
+	allOrders := api_v1.Group("/all-orders")
+	orderService := services.NewOrderService()
+	orderHandler := handlers.NewOrderHandler(orderService)
+
+	allOrders.GET("", orderHandler.GetAllOrders)
 }
